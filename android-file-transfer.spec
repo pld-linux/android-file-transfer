@@ -22,7 +22,6 @@ Group:		X11/Applications
 Source0:	https://github.com/whoozle/android-file-transfer-linux/archive/v%{version}/%{name}-%{version}.tar.gz
 # Source0-md5:	691142fdbea216676df27bfc94885f71
 URL:		https://whoozle.github.io/android-file-transfer-linux/
-BuildRequires:	Qt5Widgets-devel
 BuildRequires:	build-essential
 BuildRequires:	cmake >= 2.8
 %{?with_fuse:BuildRequires:	libfuse-devel}
@@ -30,10 +29,13 @@ BuildRequires:	libmagic-devel
 BuildRequires:	libstdc++-devel
 BuildRequires:	ninja
 BuildRequires:	pkgconfig
-BuildRequires:	qt5-build
-BuildRequires:	qt5-qmake
 BuildRequires:	readline-devel
 BuildRequires:	rpmbuild(macros) >= 1.727
+%if %{with qt}
+BuildRequires:	Qt5Widgets-devel
+BuildRequires:	qt5-build
+BuildRequires:	qt5-qmake
+%endif
 %if %{with shared}
 Requires:	%{name}-libs = %{version}-%{release}
 %endif
@@ -74,6 +76,13 @@ Static %{name} library.
 %description static -l pl.UTF-8
 Statyczna biblioteka %{name}.
 
+%package qt
+Summary:	Qt GUI
+Group:		X11/Applications
+
+%description qt
+Qt GUI.
+
 %prep
 %setup -q -n %{name}-linux-%{version}
 
@@ -98,10 +107,15 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/aft-mtp-cli
 %attr(755,root,root) %{_bindir}/aft-mtp-mount
+
+%files qt
+%defattr(644,root,root,755)
+%if %{with qt}
 %attr(755,root,root) %{_bindir}/android-file-transfer
 %{_desktopdir}/android-file-transfer.desktop
 %{_iconsdir}/hicolor/512x512/apps/android-file-transfer.png
 %{_datadir}/metainfo/android-file-transfer.appdata.xml
+%endif
 
 %if %{with shared}
 %files libs
