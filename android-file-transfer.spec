@@ -76,9 +76,23 @@ Static %{name} library.
 %description static -l pl.UTF-8
 Statyczna biblioteka %{name}.
 
+%package fuse
+Summary:	aft-mtp-mount fuse wrapper
+Group:		Applications
+%if %{with shared}
+Requires:	%{name}-libs = %{version}-%{release}
+%endif
+
+%description fuse
+FUSE wrapper (If you'd prefer mounting your device), supporting
+partial read/writes, allowing instant access to your files.
+
 %package qt
 Summary:	Qt GUI
 Group:		X11/Applications
+%if %{with shared}
+Requires:	%{name}-libs = %{version}-%{release}
+%endif
 
 %description qt
 Qt GUI.
@@ -106,11 +120,16 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/aft-mtp-cli
-%attr(755,root,root) %{_bindir}/aft-mtp-mount
 
+%if %{with fuse}
+%files fuse
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/aft-mtp-mount
+%endif
+
+%if %{with qt}
 %files qt
 %defattr(644,root,root,755)
-%if %{with qt}
 %attr(755,root,root) %{_bindir}/android-file-transfer
 %{_desktopdir}/android-file-transfer.desktop
 %{_iconsdir}/hicolor/512x512/apps/android-file-transfer.png
