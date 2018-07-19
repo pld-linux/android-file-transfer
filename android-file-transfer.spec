@@ -1,6 +1,18 @@
 # TODO
-# - BUILD_QT_UI off bcond
-# - subpackages
+# - shared lib is not versioned
+# - can't build shared and static in same build. drop shared bcond
+#
+# Conditional build:
+%bcond_without	fuse		# Build fuse mount helper
+%bcond_without	qt			# Build reference Qt application
+%bcond_without	shared		# Build shared library
+%bcond_with	static_libs	# don't build static libraries
+
+# build doesn't support both
+%if %{with shared}
+%undefine static_libs
+%endif
+
 Summary:	Android File Transfer for Linux
 Name:		android-file-transfer
 Version:	3.4
@@ -12,8 +24,9 @@ Source0:	https://github.com/whoozle/android-file-transfer-linux/archive/v%{versi
 URL:		https://whoozle.github.io/android-file-transfer-linux/
 BuildRequires:	Qt5Widgets-devel
 BuildRequires:	build-essential
-BuildRequires:	cmake
-BuildRequires:	libfuse-devel
+BuildRequires:	cmake >= 2.8
+%{?with_fuse:BuildRequires:	libfuse-devel}
+BuildRequires:	libmagic-devel
 BuildRequires:	libstdc++-devel
 BuildRequires:	ninja
 BuildRequires:	pkgconfig
@@ -21,6 +34,9 @@ BuildRequires:	qt5-build
 BuildRequires:	qt5-qmake
 BuildRequires:	readline-devel
 BuildRequires:	rpmbuild(macros) >= 1.727
+%if %{with shared}
+Requires:	%{name}-libs = %{version}-%{release}
+%endif
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -40,13 +56,35 @@ Features:
 - Available as static/shared library.
 - Command line tool (aft-mtp-cli)
 
+%package libs
+Summary:	Shared %{name} library
+Group:		Libraries
+
+%description libs
+Shared %{name} library.
+
+%package static
+Summary:	Static %{name} library
+Summary(pl.UTF-8):	Statyczna biblioteka %{name}
+Group:		Development/Libraries
+
+%description static
+Static %{name} library.
+
+%description static -l pl.UTF-8
+Statyczna biblioteka %{name}.
+
 %prep
 %setup -q -n %{name}-linux-%{version}
 
 %build
 install -d build
 cd build
-%cmake -G Ninja ..
+%cmake -G Ninja \
+	-DBUILD_FUSE=%{!?with_fuse:OFF}%{?with_fuse:ON} \
+	-DBUILD_QT_UI=%{!?with_qt:OFF}%{?with_qt:ON} \
+	-DBUILD_SHARED_LIB=%{!?with_shared:OFF}%{?with_shared:ON} \
+	..
 %ninja_build
 
 %install
@@ -61,7 +99,18 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/aft-mtp-cli
 %attr(755,root,root) %{_bindir}/aft-mtp-mount
 %attr(755,root,root) %{_bindir}/android-file-transfer
-%{_libdir}/libmtp-ng-static.a
 %{_desktopdir}/android-file-transfer.desktop
 %{_iconsdir}/hicolor/512x512/apps/android-file-transfer.png
 %{_datadir}/metainfo/android-file-transfer.appdata.xml
+
+%if %{with shared}
+%files libs
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libmtp-ng.so
+%endif
+
+%if %{with static_libs}
+%files static
+%defattr(644,root,root,755)
+%{_libdir}/libmtp-ng-static.a
+%endif
