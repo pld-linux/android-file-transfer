@@ -10,13 +10,15 @@ Group:		X11/Applications
 Source0:	https://github.com/whoozle/android-file-transfer-linux/archive/v%{version}/%{name}-%{version}.tar.gz
 # Source0-md5:	691142fdbea216676df27bfc94885f71
 URL:		https://whoozle.github.io/android-file-transfer-linux/
-BuildRequires:	QtCore-devel
+BuildRequires:	Qt5Widgets-devel
 BuildRequires:	build-essential
 BuildRequires:	cmake
 BuildRequires:	libfuse-devel
+BuildRequires:	libstdc++-devel
 BuildRequires:	ninja
-BuildRequires:	qt4-build >= 4.3.3-3
-BuildRequires:	qt4-qmake >= 4.3.3-3
+BuildRequires:	pkgconfig
+BuildRequires:	qt5-build
+BuildRequires:	qt5-qmake
 BuildRequires:	readline-devel
 BuildRequires:	rpmbuild(macros) >= 1.727
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
