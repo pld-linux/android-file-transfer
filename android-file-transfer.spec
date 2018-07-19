@@ -93,6 +93,9 @@ Group:		X11/Applications
 %if %{with shared}
 Requires:	%{name}-libs = %{version}-%{release}
 %endif
+Requires:	desktop-file-utils
+Requires:	gtk-update-icon-cache
+Requires:	hicolor-icon-theme
 
 %description qt
 Qt GUI.
@@ -117,6 +120,14 @@ rm -rf $RPM_BUILD_ROOT
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%post qt
+%update_desktop_database
+%update_icon_cache hicolor
+
+%postun qt
+%update_desktop_database
+%update_icon_cache hicolor
+
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/aft-mtp-cli
@@ -132,7 +143,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/android-file-transfer
 %{_desktopdir}/android-file-transfer.desktop
-%{_iconsdir}/hicolor/512x512/apps/android-file-transfer.png
+%{_iconsdir}/hicolor/*/apps/android-file-transfer.png
 %{_datadir}/metainfo/android-file-transfer.appdata.xml
 %endif
 
