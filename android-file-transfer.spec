@@ -16,7 +16,7 @@
 Summary:	Android File Transfer for Linux
 Name:		android-file-transfer
 Version:	3.4
-Release:	2
+Release:	3
 License:	LGPLv2.1
 Group:		X11/Applications
 Source0:	https://github.com/whoozle/android-file-transfer-linux/archive/v%{version}/%{name}-%{version}.tar.gz
