@@ -1,12 +1,10 @@
-# TODO
-# - shared lib is not versioned
-# - can't build shared and static in same build. drop shared bcond
-#
 # Conditional build:
 %bcond_without	fuse		# Build fuse mount helper
-%bcond_without	qt			# Build reference Qt application
+%bcond_without	mtpz		# Build with MTPZ support (OpenSSL)
+%bcond_without	qt		# Build reference Qt application
 %bcond_without	shared		# Build shared library
-%bcond_with	static_libs	# don't build static libraries
+%bcond_with	static_libs	# build static libraries
+%bcond_without	taglib		# Build with taglib support
 
 # build doesn't support both
 %if %{with shared}
@@ -15,22 +13,23 @@
 
 Summary:	Android File Transfer for Linux
 Name:		android-file-transfer
-Version:	3.4
-Release:	3
+Version:	4.5
+Release:	1
 License:	LGPLv2.1
 Group:		X11/Applications
 Source0:	https://github.com/whoozle/android-file-transfer-linux/archive/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	691142fdbea216676df27bfc94885f71
+# Source0-md5:	54b81adf2eabf4881e733d2e0a9fb202
 URL:		https://whoozle.github.io/android-file-transfer-linux/
-BuildRequires:	build-essential
-BuildRequires:	cmake >= 2.8
-%{?with_fuse:BuildRequires:	libfuse-devel}
+BuildRequires:	cmake >= 3.10
+%{?with_fuse:BuildRequires:	libfuse3-devel}
 BuildRequires:	libmagic-devel
 BuildRequires:	libstdc++-devel
+%{?with_mtpz:BuildRequires:	openssl-devel}
 BuildRequires:	ninja
 BuildRequires:	pkgconfig
 BuildRequires:	readline-devel
 BuildRequires:	rpmbuild(macros) >= 1.727
+%{?with_taglib:BuildRequires:	taglib-devel}
 %if %{with qt}
 BuildRequires:	Qt5Widgets-devel
 BuildRequires:	qt5-build
@@ -108,8 +107,11 @@ install -d build
 cd build
 %cmake -G Ninja \
 	-DBUILD_FUSE=%{!?with_fuse:OFF}%{?with_fuse:ON} \
+	-DBUILD_MTPZ=%{!?with_mtpz:OFF}%{?with_mtpz:ON} \
+	-DBUILD_PYTHON=OFF \
 	-DBUILD_QT_UI=%{!?with_qt:OFF}%{?with_qt:ON} \
 	-DBUILD_SHARED_LIB=%{!?with_shared:OFF}%{?with_shared:ON} \
+	-DBUILD_TAGLIB=%{!?with_taglib:OFF}%{?with_taglib:ON} \
 	..
 %ninja_build
 
@@ -143,14 +145,15 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/android-file-transfer
 %{_desktopdir}/android-file-transfer.desktop
-%{_iconsdir}/hicolor/*/apps/android-file-transfer.png
+%{_iconsdir}/hicolor/512x512/apps/android-file-transfer.png
 %{_datadir}/metainfo/android-file-transfer.appdata.xml
 %endif
 
 %if %{with shared}
 %files libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libmtp-ng.so
+%attr(755,root,root) %{_libdir}/libmtp-ng.so.*
+%{_libdir}/libmtp-ng.so
 %endif
 
 %if %{with static_libs}
